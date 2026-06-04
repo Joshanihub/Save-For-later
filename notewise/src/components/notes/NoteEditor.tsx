@@ -178,10 +178,11 @@ export function NoteEditor({ noteId, onBack }: NoteEditorProps) {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Untitled"
+            placeholder="Untitled Note"
             className="w-full text-3xl font-display font-bold text-txt-primary
-                      bg-transparent outline-none border-none placeholder:text-txt-tertiary
-                      mb-4"
+                      bg-transparent outline-none border border-transparent 
+                      hover:bg-surface-1 focus:bg-surface-0 focus:border-brand-500
+                      placeholder:text-txt-tertiary mb-4 rounded-md px-2 py-1 -ml-2 transition-colors"
             id="editor-title-input"
           />
 

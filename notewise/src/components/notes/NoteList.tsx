@@ -1,16 +1,17 @@
 import type { Note } from '../../types';
 import { formatRelativeDate, truncate } from '../../utils/noteHelpers';
-import { FileText, Trash2 } from 'lucide-react';
+import { FileText, Trash2, RotateCcw } from 'lucide-react';
 
 interface NoteCardProps {
   note: Note;
   isSelected: boolean;
   onClick: (id: string) => void;
   onDelete?: (id: string) => void;
+  onRestore?: (id: string) => void;
   isTrashView?: boolean;
 }
 
-export function NoteCard({ note, isSelected, onClick, onDelete, isTrashView }: NoteCardProps) {
+export function NoteCard({ note, isSelected, onClick, onDelete, onRestore, isTrashView }: NoteCardProps) {
   const preview = truncate(note.content.replace(/[#*_~`>]/g, ''), 120);
 
   return (
@@ -39,14 +40,27 @@ export function NoteCard({ note, isSelected, onClick, onDelete, isTrashView }: N
       </div>
       </button>
 
-      {isTrashView && onDelete && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onDelete(note.id); }}
-          className="absolute top-2 right-2 p-1.5 opacity-0 group-hover:opacity-100 bg-red-100 text-red-600 rounded-md hover:bg-red-200 transition-opacity"
-          title="Permanently Delete"
-        >
-          <Trash2 size={14} />
-        </button>
+      {isTrashView && (
+        <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          {onRestore && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onRestore(note.id); }}
+              className="p-1.5 bg-green-100 text-green-600 rounded-md hover:bg-green-200 transition-colors"
+              title="Restore Note"
+            >
+              <RotateCcw size={14} />
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onDelete(note.id); }}
+              className="p-1.5 bg-red-100 text-red-600 rounded-md hover:bg-red-200 transition-colors"
+              title="Permanently Delete"
+            >
+              <Trash2 size={14} />
+            </button>
+          )}
+        </div>
       )}
     </div>
   );
@@ -59,6 +73,7 @@ interface NoteListProps {
   selectedNoteId: string | null;
   onSelectNote: (id: string) => void;
   onDeleteNote?: (id: string) => void;
+  onRestoreNote?: (id: string) => void;
   isTrashView?: boolean;
   viewMode: 'grid' | 'list';
   title: string;
@@ -69,6 +84,7 @@ export function NoteList({
   selectedNoteId,
   onSelectNote,
   onDeleteNote,
+  onRestoreNote,
   isTrashView,
   viewMode,
   title,
@@ -110,6 +126,7 @@ export function NoteList({
             isSelected={selectedNoteId === note.id}
             onClick={onSelectNote}
             onDelete={onDeleteNote}
+            onRestore={onRestoreNote}
             isTrashView={isTrashView}
           />
         ))}

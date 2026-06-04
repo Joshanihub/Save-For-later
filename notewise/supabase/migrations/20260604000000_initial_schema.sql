@@ -221,7 +221,10 @@ ALTER TABLE user_streaks ENABLE ROW LEVEL SECURITY;
 
 -- ─── Notes RLS ────────────────────────────────────────────────
 CREATE POLICY "users_can_read_own_notes" ON notes
-  FOR SELECT USING (auth.uid() = user_id);
+  FOR SELECT USING (
+    auth.uid() = user_id OR
+    EXISTS (SELECT 1 FROM share_links WHERE share_links.note_id = notes.id)
+  );
 CREATE POLICY "users_can_create_notes" ON notes
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "users_can_update_own_notes" ON notes
@@ -300,8 +303,8 @@ CREATE POLICY "users_can_delete_own_reading_list" ON reading_list
   FOR DELETE USING (auth.uid() = user_id);
 
 -- ─── Share Links RLS ─────────────────────────────────────────
-CREATE POLICY "users_can_read_own_share_links" ON share_links
-  FOR SELECT USING (auth.uid() = creator_user_id);
+CREATE POLICY "anyone_can_read_share_links" ON share_links
+  FOR SELECT USING (true);
 CREATE POLICY "users_can_create_share_links" ON share_links
   FOR INSERT WITH CHECK (auth.uid() = creator_user_id);
 CREATE POLICY "users_can_delete_own_share_links" ON share_links

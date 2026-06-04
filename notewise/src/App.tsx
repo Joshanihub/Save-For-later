@@ -63,7 +63,7 @@ export default function App() {
     return f;
   }, [activeView]);
 
-  const { notes, deleteNote } = useNotes(filters);
+  const { notes, deleteNote, updateNote } = useNotes(filters);
 
   // Derived state: Filtered notes based on active view and search
   const filteredNotes = useMemo(() => {
@@ -178,6 +178,7 @@ export default function App() {
               selectedNoteId={selectedNoteId}
               onSelectNote={setSelectedNoteId}
               onDeleteNote={(id) => deleteNote({ id, soft: activeView !== 'trash' })}
+              onRestoreNote={activeView === 'trash' ? (id) => updateNote({ id, updates: { isSoftDeleted: false, deletedAt: null } }) : undefined}
               isTrashView={activeView === 'trash'}
               viewMode={viewMode}
               title={getListTitle()}
