@@ -1,0 +1,1 @@
+chrome.runtime.onInstalled.addListener(()=>{console.log(`Notewise extension installed.`)}),chrome.alarms.create(`sync-alarm`,{periodInMinutes:15}),chrome.alarms.onAlarm.addListener(e=>{e.name===`sync-alarm`&&console.log(`Triggering background sync`)});
