@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useReadingList } from '../../hooks/useReadingList';
+import useToastStore from '../../store/toastStore';
 import { BookOpen, Plus, CheckCircle, Circle, Trash2, ExternalLink } from 'lucide-react';
 import { formatRelativeDate } from '../../utils/noteHelpers';
 
 export function ReadingListView() {
   const { readingList, addUrl, isAdding, toggleReadStatus, deleteItem } = useReadingList();
   const [url, setUrl] = useState('');
+  const showToast = useToastStore((state) => state.showToast);
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
@@ -15,7 +17,7 @@ export function ReadingListView() {
       addUrl(url);
       setUrl('');
     } catch (err) {
-      alert("Please enter a valid URL.");
+      showToast("Please enter a valid URL.", 'error');
     }
   };
 

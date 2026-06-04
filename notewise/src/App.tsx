@@ -14,7 +14,7 @@ import { useStreaks } from './hooks/useStreaks';
 import { initReminderWorker } from './workers/reminderWorker';
 import { Dashboard } from './components/layout/Dashboard';
 import { SettingsModal } from './components/shared/SettingsModal';
-
+import { ToastProvider } from './components/shared/ToastProvider';
 import { ReadingListView } from './components/layout/ReadingListView';
 
 export default function App() {
@@ -116,6 +116,7 @@ export default function App() {
   if (!session) {
     return (
       <>
+        <ToastProvider />
         <SidebarToggle />
         <Login />
       </>
@@ -124,6 +125,7 @@ export default function App() {
 
   return (
     <div className="flex h-screen bg-surface-0 text-txt-primary overflow-hidden font-sans">
+      <ToastProvider />
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
       <SidebarToggle />
       

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useShareLinks } from '../../hooks/useShareLinks';
+import useToastStore from '../../store/toastStore';
 import { Share2, Copy, X, Trash2, ExternalLink } from 'lucide-react';
 
 interface ShareModalProps {
@@ -10,6 +11,7 @@ interface ShareModalProps {
 export function ShareModal({ noteId, onClose }: ShareModalProps) {
   const { shareLinks, createShareLink, isCreating, deleteShareLink } = useShareLinks(noteId);
   const [expiresInDays, setExpiresInDays] = useState<number | ''>('');
+  const showToast = useToastStore((state) => state.showToast);
 
   const handleCreate = () => {
     createShareLink({ noteId, expiresInDays: expiresInDays === '' ? undefined : Number(expiresInDays) });
@@ -23,7 +25,7 @@ export function ShareModal({ noteId, onClose }: ShareModalProps) {
   const copyToClipboard = async (token: string) => {
     try {
       await navigator.clipboard.writeText(getShareUrl(token));
-      alert('Link copied to clipboard!');
+      showToast('Link copied to clipboard!', 'success');
     } catch (err) {
       console.error('Failed to copy', err);
     }
