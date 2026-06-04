@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Bell, BellOff } from 'lucide-react';
 import useUIStore from '../../store/uiStore';
 import useToastStore from '../../store/toastStore';
+import { ImportSection } from './ImportSection';
 
 interface SettingsModalProps {
   onClose: () => void;
@@ -115,6 +116,8 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
               </p>
             )}
           </div>
+
+          <ImportSection />
         </div>
 
         <div className="p-4 border-t border-edge bg-surface-1 flex justify-end">

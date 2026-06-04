@@ -52,6 +52,8 @@ export function toSnakeCaseNote(note: Note): Record<string, any> {
     reading_time_minutes: note.readingTimeMinutes,
     is_archived: note.isArchived,
     is_soft_deleted: note.isSoftDeleted,
+    is_public: note.isPublic,
+    public_slug: note.publicSlug,
     deleted_at: note.deletedAt,
     created_at: note.createdAt,
     updated_at: note.updatedAt,

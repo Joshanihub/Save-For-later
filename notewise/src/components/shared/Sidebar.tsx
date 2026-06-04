@@ -10,7 +10,8 @@ import {
   Hash,
   LayoutDashboard,
   LogOut,
-  BookOpen
+  BookOpen,
+  Network
 } from 'lucide-react';
 import useUIStore from '../../store/uiStore';
 import { useNotes } from '../../hooks/useNotes';
@@ -134,6 +135,15 @@ export function Sidebar({ onNewNote, activeView, onViewChange }: SidebarProps) {
         >
           <BookOpen size={18} />
           <span className="flex-1 text-left">Reading List</span>
+        </button>
+
+        <button
+          className={`sidebar-item w-full ${activeView === 'graph' ? 'active' : ''}`}
+          onClick={() => onViewChange('graph')}
+          id="nav-graph"
+        >
+          <Network size={18} />
+          <span className="flex-1 text-left">Knowledge Graph</span>
         </button>
 
         <p className="text-2xs font-semibold text-txt-tertiary uppercase tracking-wider px-3 pt-4 pb-1">

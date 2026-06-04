@@ -11,6 +11,8 @@ export interface Note {
   readingTimeMinutes: number;
   isArchived: boolean;
   isSoftDeleted: boolean;
+  isPublic?: boolean;
+  publicSlug?: string | null;
   deletedAt: string | null;
   createdAt: string;
   updatedAt: string;

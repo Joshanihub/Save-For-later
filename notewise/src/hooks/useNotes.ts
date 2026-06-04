@@ -17,6 +17,8 @@ function toFrontendNote(row: Record<string, unknown>): Note {
     readingTimeMinutes: (row.reading_time_minutes as number) ?? 0,
     isArchived: (row.is_archived as boolean) ?? false,
     isSoftDeleted: (row.is_soft_deleted as boolean) ?? false,
+    isPublic: (row.is_public as boolean) ?? false,
+    publicSlug: (row.public_slug as string) ?? null,
     deletedAt: (row.deleted_at as string) ?? null,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
@@ -36,6 +38,8 @@ function toSnakeCaseUpdates(updates: Partial<Note>): Record<string, unknown> {
   if (updates.readingTimeMinutes !== undefined) mapped.reading_time_minutes = updates.readingTimeMinutes;
   if (updates.isArchived !== undefined) mapped.is_archived = updates.isArchived;
   if (updates.isSoftDeleted !== undefined) mapped.is_soft_deleted = updates.isSoftDeleted;
+  if (updates.isPublic !== undefined) mapped.is_public = updates.isPublic;
+  if (updates.publicSlug !== undefined) mapped.public_slug = updates.publicSlug;
   if (updates.deletedAt !== undefined) mapped.deleted_at = updates.deletedAt;
   mapped.updated_at = new Date().toISOString();
   return mapped;

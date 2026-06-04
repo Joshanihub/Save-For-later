@@ -7,10 +7,12 @@ import { AuthProvider } from './components/auth/AuthProvider.tsx'
 import { Analytics } from "@vercel/analytics/react"
 
 import { SharedNoteView } from './components/public/SharedNoteView.tsx'
+import { PublicNoteView } from './components/public/PublicNoteView.tsx'
 
 const queryClient = new QueryClient();
 
 const isSharedRoute = window.location.pathname.startsWith('/share/');
+const isPublicRoute = window.location.pathname.startsWith('/p/');
 
 // If running inside a Chrome extension popup, set a fixed width/height
 // so the layout has enough room for the sidebar and editor.
@@ -27,6 +29,8 @@ createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       {isSharedRoute ? (
         <SharedNoteView />
+      ) : isPublicRoute ? (
+        <PublicNoteView />
       ) : (
         <AuthProvider>
           <App />

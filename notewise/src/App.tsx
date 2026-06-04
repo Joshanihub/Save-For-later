@@ -16,6 +16,10 @@ import { Dashboard } from './components/layout/Dashboard';
 import { SettingsModal } from './components/shared/SettingsModal';
 import { ToastProvider } from './components/shared/ToastProvider';
 import { ReadingListView } from './components/layout/ReadingListView';
+import { TemplateSelectorModal } from './components/notes/TemplateSelectorModal';
+import { NoteTemplate } from './utils/templates';
+import { GraphView } from './components/layout/GraphView';
+import { AIChatPanel } from './components/layout/AIChatPanel';
 
 export default function App() {
   // Initialize theme
@@ -29,6 +33,7 @@ export default function App() {
   const { selectedNoteId, setSelectedNoteId, addNote, addToSyncQueue } = useNotesStore();
   const { updateActivity } = useStreaks();
   const [showSettings, setShowSettings] = useState(false);
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
 
   // Initialize background workers and gamification logic
   useEffect(() => {
@@ -87,6 +92,11 @@ export default function App() {
 
   const handleNewNote = () => {
     if (!session) return;
+    setIsTemplateModalOpen(true);
+  };
+
+  const confirmNewNote = (template: NoteTemplate) => {
+    if (!session) return;
     let collectionId: string | undefined;
     if (activeView.startsWith('collection-')) {
       collectionId = activeView.replace('collection-', '');
@@ -94,6 +104,11 @@ export default function App() {
     
     // Use actual user ID instead of 'local-user'
     const newNote = createEmptyNote(session.user.id, collectionId);
+    if (template.content) {
+      newNote.content = template.content;
+      newNote.title = template.id === 'blank' ? 'Untitled Note' : template.name;
+    }
+
     addNote(newNote);
     addToSyncQueue({
       action: 'create',
@@ -127,6 +142,11 @@ export default function App() {
     <div className="flex h-screen bg-surface-0 text-txt-primary overflow-hidden font-sans">
       <ToastProvider />
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
+      <TemplateSelectorModal 
+        isOpen={isTemplateModalOpen} 
+        onClose={() => setIsTemplateModalOpen(false)} 
+        onSelect={confirmNewNote} 
+      />
       <SidebarToggle />
       
       <Sidebar
@@ -149,9 +169,17 @@ export default function App() {
           <NoteEditor
             noteId={selectedNoteId}
             onBack={() => setSelectedNoteId(null)}
+            onNavigateToNote={(id) => setSelectedNoteId(id)}
           />
         ) : activeView === 'reading-list' && !searchQuery ? (
           <ReadingListView />
+        ) : activeView === 'graph' && !searchQuery ? (
+          <GraphView
+            onSelectNote={(id) => {
+              setSelectedNoteId(id);
+            }}
+            onClose={() => setActiveView('dashboard')}
+          />
         ) : activeView === 'dashboard' && !searchQuery ? (
           <Dashboard 
             onNewNote={handleNewNote} 
@@ -186,6 +214,9 @@ export default function App() {
           </div>
         )}
       </main>
+
+      {/* AI Chat Floating Panel */}
+      <AIChatPanel onSelectNote={(id) => setSelectedNoteId(id)} />
     </div>
   );
 }

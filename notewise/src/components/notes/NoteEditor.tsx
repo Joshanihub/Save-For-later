@@ -10,13 +10,17 @@ import { TaskPane } from './TaskPane';
 import { ReminderPane } from './ReminderPane';
 import { CommentPane } from './CommentPane';
 import { ShareModal } from './ShareModal';
+import { PublishModal } from './PublishModal';
+import { BacklinksPane } from './BacklinksPane';
+import { Globe, Link as LinkIcon } from 'lucide-react';
 
 interface NoteEditorProps {
   noteId: string;
   onBack: () => void;
+  onNavigateToNote?: (id: string) => void;
 }
 
-export function NoteEditor({ noteId, onBack }: NoteEditorProps) {
+export function NoteEditor({ noteId, onBack, onNavigateToNote }: NoteEditorProps) {
   const { notes, updateNote, isUpdating } = useNotes();
   const { collections } = useCollections();
   const { tags, addTagToNote, removeTagFromNote } = useTags();
@@ -28,6 +32,7 @@ export function NoteEditor({ noteId, onBack }: NoteEditorProps) {
   const [showReminders, setShowReminders] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const [showPublish, setShowPublish] = useState(false);
   
   // Update local state if the note changes externally
   useEffect(() => {
@@ -93,6 +98,7 @@ export function NoteEditor({ noteId, onBack }: NoteEditorProps) {
   return (
     <div className="flex-1 flex h-full overflow-hidden" data-color-mode="light">
       {showShare && <ShareModal noteId={noteId} onClose={() => setShowShare(false)} />}
+      {showPublish && <PublishModal noteId={noteId} onClose={() => setShowPublish(false)} />}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Toolbar */}
         <header className="flex items-center justify-between px-6 py-3 border-b border-edge">
@@ -148,9 +154,16 @@ export function NoteEditor({ noteId, onBack }: NoteEditorProps) {
             <button
               onClick={() => setShowShare(true)}
               className="btn-icon hover:text-brand-500"
-              title="Share Note"
+              title="Share Link"
             >
               <Share2 size={16} />
+            </button>
+            <button
+              onClick={() => setShowPublish(true)}
+              className={`btn-icon hover:text-brand-500 ${note.isPublic ? 'text-brand-500' : ''}`}
+              title="Publish to Web"
+            >
+              <Globe size={16} />
             </button>
             <button
               onClick={handleArchive}
@@ -203,6 +216,13 @@ export function NoteEditor({ noteId, onBack }: NoteEditorProps) {
               />
             </Suspense>
           </div>
+
+          {/* Backlinks */}
+          <BacklinksPane
+            noteId={noteId}
+            content={content}
+            onNavigateToNote={onNavigateToNote || onBack}
+          />
         </div>
 
         {/* Footer stats */}
