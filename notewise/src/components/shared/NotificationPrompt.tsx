@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bell, BellOff, X } from 'lucide-react';
+import { Bell, X } from 'lucide-react';
 import useUIStore from '../../store/uiStore';
 
 /**
@@ -12,16 +12,13 @@ import useUIStore from '../../store/uiStore';
 export function NotificationPrompt() {
   const { notificationsEnabled, setPreferences } = useUIStore();
   const [visible, setVisible] = useState(false);
-  const [permissionState, setPermissionState] = useState<NotificationPermission | 'unsupported'>('default');
 
   useEffect(() => {
     if (!('Notification' in window)) {
-      setPermissionState('unsupported');
       return;
     }
 
     const perm = Notification.permission;
-    setPermissionState(perm);
 
     // Show the banner only when:
     // 1. Permission is still "default" (never asked before)
@@ -36,7 +33,6 @@ export function NotificationPrompt() {
 
     try {
       const permission = await Notification.requestPermission();
-      setPermissionState(permission);
 
       if (permission === 'granted') {
         setPreferences({ notificationsEnabled: true });
