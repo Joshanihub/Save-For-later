@@ -10,6 +10,7 @@ import {
   Hash,
   LayoutDashboard,
   LogOut,
+  BookOpen
 } from 'lucide-react';
 import useUIStore from '../../store/uiStore';
 import { useNotes } from '../../hooks/useNotes';
@@ -17,6 +18,7 @@ import { useCollections } from '../../hooks/useCollections';
 import { useTags } from '../../hooks/useTags';
 
 import { useStreaks } from '../../hooks/useStreaks';
+import { PomodoroTimer } from './PomodoroTimer';
 
 interface SidebarProps {
   onNewNote: () => void;
@@ -124,6 +126,15 @@ export function Sidebar({ onNewNote, activeView, onViewChange }: SidebarProps) {
           <span className="flex-1 text-left">Dashboard</span>
         </button>
 
+        <button
+          className={`sidebar-item w-full ${activeView === 'reading-list' ? 'active' : ''}`}
+          onClick={() => onViewChange('reading-list')}
+          id="nav-reading-list"
+        >
+          <BookOpen size={18} />
+          <span className="flex-1 text-left">Reading List</span>
+        </button>
+
         <p className="text-2xs font-semibold text-txt-tertiary uppercase tracking-wider px-3 pt-4 pb-1">
           Notes
         </p>
@@ -226,6 +237,9 @@ export function Sidebar({ onNewNote, activeView, onViewChange }: SidebarProps) {
           )}
         </div>
       </nav>
+
+      {/* Pomodoro Timer */}
+      <PomodoroTimer />
 
       {/* Footer */}
       <div className="px-2 py-3 border-t border-edge flex flex-col gap-1">

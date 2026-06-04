@@ -1,12 +1,15 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { useDebounce } from 'use-debounce';
 const MDEditor = lazy(() => import('@uiw/react-md-editor'));
-import { ArrowLeft, Archive, Trash2, MoreHorizontal, Clock, Tag, CheckSquare } from 'lucide-react';
+import { ArrowLeft, Archive, Trash2, MoreHorizontal, Clock, Tag, CheckSquare, Bell, MessageSquare, Share2 } from 'lucide-react';
 import { computeNoteStats, formatRelativeDate } from '../../utils/noteHelpers';
 import { useNotes } from '../../hooks/useNotes';
 import { useCollections } from '../../hooks/useCollections';
 import { useTags } from '../../hooks/useTags';
 import { TaskPane } from './TaskPane';
+import { ReminderPane } from './ReminderPane';
+import { CommentPane } from './CommentPane';
+import { ShareModal } from './ShareModal';
 
 interface NoteEditorProps {
   noteId: string;
@@ -22,6 +25,9 @@ export function NoteEditor({ noteId, onBack }: NoteEditorProps) {
   const [title, setTitle] = useState(note?.title ?? '');
   const [content, setContent] = useState(note?.content ?? '');
   const [showTasks, setShowTasks] = useState(false);
+  const [showReminders, setShowReminders] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [showShare, setShowShare] = useState(false);
   
   // Update local state if the note changes externally
   useEffect(() => {
@@ -68,6 +74,12 @@ export function NoteEditor({ noteId, onBack }: NoteEditorProps) {
     onBack();
   };
 
+  const togglePane = (pane: 'tasks' | 'reminders' | 'comments') => {
+    setShowTasks(pane === 'tasks' ? !showTasks : false);
+    setShowReminders(pane === 'reminders' ? !showReminders : false);
+    setShowComments(pane === 'comments' ? !showComments : false);
+  };
+
   if (!note) {
     return (
       <div className="flex-1 flex items-center justify-center text-txt-tertiary animate-fade-in">
@@ -80,6 +92,7 @@ export function NoteEditor({ noteId, onBack }: NoteEditorProps) {
 
   return (
     <div className="flex-1 flex h-full overflow-hidden" data-color-mode="light">
+      {showShare && <ShareModal noteId={noteId} onClose={() => setShowShare(false)} />}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Toolbar */}
         <header className="flex items-center justify-between px-6 py-3 border-b border-edge">
@@ -111,18 +124,38 @@ export function NoteEditor({ noteId, onBack }: NoteEditorProps) {
             </select>
             <div className="w-px h-4 bg-edge mx-1" />
             <button
-              onClick={() => setShowTasks(!showTasks)}
+              onClick={() => togglePane('tasks')}
               className={`btn-icon ${showTasks ? 'text-brand-500 bg-brand-500/10' : ''}`}
               title="Toggle Tasks"
             >
               <CheckSquare size={16} />
             </button>
+            <button
+              onClick={() => togglePane('reminders')}
+              className={`btn-icon ${showReminders ? 'text-brand-500 bg-brand-500/10' : ''}`}
+              title="Toggle Reminders"
+            >
+              <Bell size={16} />
+            </button>
+            <button
+              onClick={() => togglePane('comments')}
+              className={`btn-icon ${showComments ? 'text-brand-500 bg-brand-500/10' : ''}`}
+              title="Toggle Comments"
+            >
+              <MessageSquare size={16} />
+            </button>
             <div className="w-px h-4 bg-edge mx-1" />
+            <button
+              onClick={() => setShowShare(true)}
+              className="btn-icon hover:text-brand-500"
+              title="Share Note"
+            >
+              <Share2 size={16} />
+            </button>
             <button
               onClick={handleArchive}
               className="btn-icon"
               title={note.isArchived ? 'Unarchive' : 'Archive'}
-              id="editor-archive-btn"
             >
               <Archive size={16} />
             </button>
@@ -130,7 +163,6 @@ export function NoteEditor({ noteId, onBack }: NoteEditorProps) {
               onClick={handleTrash}
               className="btn-icon text-status-error hover:bg-red-50 dark:hover:bg-red-950"
               title="Move to trash"
-              id="editor-trash-btn"
             >
               <Trash2 size={16} />
             </button>
@@ -223,10 +255,10 @@ export function NoteEditor({ noteId, onBack }: NoteEditorProps) {
         </footer>
       </div>
 
-      {/* Side Pane */}
-      {showTasks && (
-        <TaskPane noteId={noteId} />
-      )}
+      {/* Side Panes */}
+      {showTasks && <TaskPane noteId={noteId} />}
+      {showReminders && <ReminderPane noteId={noteId} />}
+      {showComments && <CommentPane noteId={noteId} />}
     </div>
   );
 }

@@ -23,6 +23,12 @@ export function useOfflineSync() {
     const syncedIds: string[] = [];
     
     for (const item of syncQueue) {
+      // Discard items that have failed too many times to prevent permanent queue blocking
+      if ((item.retryCount || 0) > 3) {
+        syncedIds.push(item.id);
+        continue;
+      }
+
       try {
         const payload = item.payload as any; // Cast for now
         
@@ -44,10 +50,10 @@ export function useOfflineSync() {
         }
 
         syncedIds.push(item.id);
-      } catch (error) {
+      } catch (error: any) {
         console.error(`Sync failed for ${item.id}:`, error);
-        // Break early on failure to maintain order, or continue? 
-        // For simplicity, we break to avoid conflicting out-of-order updates.
+        useNotesStore.getState().updateSyncItemStatus(item.id, 'failed', error?.message || 'Unknown error');
+        // Break early on failure to maintain order for remaining items
         break; 
       }
     }
@@ -56,7 +62,7 @@ export function useOfflineSync() {
       removeSyncItems(syncedIds);
     }
     
-    setIsPending(syncQueue.length > syncedIds.length);
+    setIsPending(false); // Reset pending status so next effect can trigger if needed
   }, [syncQueue, removeSyncItems]);
 
   // Listen for online/offline events
@@ -66,16 +72,18 @@ export function useOfflineSync() {
       console.log('App is now offline');
     });
 
-    // Attempt to sync immediately on mount if online
-    if (navigator.onLine) {
-      syncPending();
-    }
-
     return () => {
       window.removeEventListener('online', syncPending);
       window.removeEventListener('offline', () => {});
     };
   }, [syncPending]);
+
+  // Auto-sync when queue changes
+  useEffect(() => {
+    if (navigator.onLine && syncQueue.length > 0 && !isPending) {
+      syncPending();
+    }
+  }, [syncQueue, isPending, syncPending]);
 
   return { syncPending, isPending };
 }

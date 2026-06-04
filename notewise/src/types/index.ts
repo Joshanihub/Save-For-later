@@ -75,6 +75,46 @@ export interface Reminder {
   updatedAt: string;
 }
 
+export interface PomodoroSession {
+  id: string;
+  userId: string;
+  durationMinutes: number;
+  breaksTaken: number;
+  completedAt: string;
+  createdAt: string;
+}
+
+export interface ReadingListItem {
+  id: string;
+  userId: string;
+  url: string;
+  title: string | null;
+  contentPreview: string | null;
+  readingTimeMinutes: number;
+  isRead: boolean;
+  readAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ShareLink {
+  id: string;
+  noteId: string;
+  userId: string;
+  accessToken: string;
+  expiresAt: string | null;
+  createdAt: string;
+}
+
+export interface Comment {
+  id: string;
+  noteId: string;
+  userId: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ─── Sync Types ─────────────────────────────────────────────────
 
 export type SyncAction = 'create' | 'update' | 'delete';

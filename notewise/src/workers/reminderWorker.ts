@@ -14,7 +14,7 @@ export function initReminderWorker() {
     Notification.requestPermission();
   }
 
-  // Poll every 60 seconds
+  // Poll every 10 seconds for more responsive notifications
   const intervalId = setInterval(async () => {
     if (Notification.permission !== 'granted') return;
 
@@ -33,23 +33,31 @@ export function initReminderWorker() {
 
       if (error || !data) return;
 
-      data.forEach((reminder: any) => {
+      for (const reminder of data) {
         if (!notifiedReminders.has(reminder.id)) {
           // Show notification
           const noteTitle = reminder.notes?.title || 'Note';
           
-          new Notification(`Reminder: ${noteTitle}`, {
+          const notification = new Notification(`Reminder: ${noteTitle}`, {
             body: reminder.message,
-            icon: '/favicon.ico', // Update if you have an app icon
+            icon: '/vite.svg', 
           });
 
+          notification.onclick = () => {
+            window.focus();
+            notification.close();
+          };
+
           notifiedReminders.add(reminder.id);
+
+          // Automatically delete the reminder so it doesn't fire again on next load
+          await supabase.from('reminders').delete().eq('id', reminder.id);
         }
-      });
+      }
     } catch (err) {
       console.error('Error polling reminders:', err);
     }
-  }, 60000);
+  }, 10000);
 
   return () => clearInterval(intervalId);
 }

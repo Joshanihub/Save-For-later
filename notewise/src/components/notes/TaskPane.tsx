@@ -9,12 +9,14 @@ interface TaskPaneProps {
 export function TaskPane({ noteId }: TaskPaneProps) {
   const { tasks, createTask, updateTask, deleteTask } = useTasks(noteId);
   const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [recurrence, setRecurrence] = useState('');
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTaskTitle.trim()) return;
-    createTask({ noteId, title: newTaskTitle.trim() });
+    createTask({ noteId, title: newTaskTitle.trim(), recurrence: recurrence || null });
     setNewTaskTitle('');
+    setRecurrence('');
   };
 
   return (
@@ -62,7 +64,7 @@ export function TaskPane({ noteId }: TaskPaneProps) {
         )}
       </div>
 
-      <div className="p-3 border-t border-edge bg-surface-0 flex flex-col gap-2">
+      <div className="p-3 border-t border-edge bg-surface-0">
         <form onSubmit={handleCreate} className="flex flex-col gap-2">
           <input
             type="text"
@@ -74,8 +76,8 @@ export function TaskPane({ noteId }: TaskPaneProps) {
           <div className="flex items-center gap-2">
             <select
               className="text-xs bg-surface-1 border border-edge rounded px-2 py-1 flex-1 text-txt-secondary outline-none"
-              defaultValue=""
-              id="new-task-recurrence"
+              value={recurrence}
+              onChange={(e) => setRecurrence(e.target.value)}
             >
               <option value="">No recurrence</option>
               <option value="daily">Daily</option>
@@ -86,13 +88,6 @@ export function TaskPane({ noteId }: TaskPaneProps) {
               type="submit"
               disabled={!newTaskTitle.trim()}
               className="btn-icon bg-brand-500 text-white hover:bg-brand-600 disabled:opacity-50 disabled:bg-surface-2 disabled:text-txt-tertiary"
-              onClick={(e) => {
-                e.preventDefault();
-                const rec = (document.getElementById('new-task-recurrence') as HTMLSelectElement).value;
-                if (!newTaskTitle.trim()) return;
-                createTask({ noteId, title: newTaskTitle.trim(), recurrence: rec || null });
-                setNewTaskTitle('');
-              }}
             >
               <Plus size={16} />
             </button>
@@ -102,3 +97,4 @@ export function TaskPane({ noteId }: TaskPaneProps) {
     </div>
   );
 }
+

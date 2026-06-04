@@ -3,12 +3,48 @@ import { supabase } from '../lib/supabaseClient';
 import useNotesStore from '../store/notesStore';
 import type { Note } from '../types';
 
+/** Maps a Supabase row (snake_case) to a frontend Note (camelCase) */
+function toFrontendNote(row: Record<string, unknown>): Note {
+  return {
+    id: row.id as string,
+    userId: row.user_id as string,
+    collectionId: (row.collection_id as string) ?? null,
+    title: row.title as string,
+    content: row.content as string,
+    wordCount: (row.word_count as number) ?? 0,
+    charCount: (row.char_count as number) ?? 0,
+    readingTimeMinutes: (row.reading_time_minutes as number) ?? 0,
+    isArchived: (row.is_archived as boolean) ?? false,
+    isSoftDeleted: (row.is_soft_deleted as boolean) ?? false,
+    deletedAt: (row.deleted_at as string) ?? null,
+    createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
+    syncedAt: (row.synced_at as string) ?? row.updated_at as string,
+    note_tags: row.note_tags as { tag_id: string }[] | undefined,
+  };
+}
+
+/** Maps camelCase update fields to snake_case for Supabase */
+function toSnakeCaseUpdates(updates: Partial<Note>): Record<string, unknown> {
+  const mapped: Record<string, unknown> = {};
+  if (updates.title !== undefined) mapped.title = updates.title;
+  if (updates.content !== undefined) mapped.content = updates.content;
+  if (updates.collectionId !== undefined) mapped.collection_id = updates.collectionId;
+  if (updates.wordCount !== undefined) mapped.word_count = updates.wordCount;
+  if (updates.charCount !== undefined) mapped.char_count = updates.charCount;
+  if (updates.readingTimeMinutes !== undefined) mapped.reading_time_minutes = updates.readingTimeMinutes;
+  if (updates.isArchived !== undefined) mapped.is_archived = updates.isArchived;
+  if (updates.isSoftDeleted !== undefined) mapped.is_soft_deleted = updates.isSoftDeleted;
+  if (updates.deletedAt !== undefined) mapped.deleted_at = updates.deletedAt;
+  mapped.updated_at = new Date().toISOString();
+  return mapped;
+}
+
 export function useNotes(filters?: {
   collectionId?: string;
   tags?: string[];
   archived?: boolean;
 }) {
-  const { notes: localNotes } = useNotesStore();
   const queryClient = useQueryClient();
 
   const queryKey = ['notes', filters];
@@ -17,11 +53,17 @@ export function useNotes(filters?: {
   const { data: serverNotes = [], isLoading, error } = useQuery({
     queryKey,
     queryFn: async () => {
-      // Always fetch note_tags so we can display them in the UI
       let query = supabase
         .from('notes')
-        .select('*, note_tags(tag_id)')
-        .eq('is_soft_deleted', false);
+        .select('*, note_tags(tag_id)');
+
+      // For trash view we need soft-deleted notes; for everything else exclude them
+      if (filters?.archived === undefined && filters?.collectionId === undefined && !filters?.tags?.length) {
+        // Default: could be "all" or "trash" — fetch everything and let client filter
+        // Don't filter is_soft_deleted here so trash view works
+      } else {
+        query = query.eq('is_soft_deleted', false);
+      }
 
       if (filters?.collectionId) {
         query = query.eq('collection_id', filters.collectionId);
@@ -29,72 +71,43 @@ export function useNotes(filters?: {
       if (filters?.archived !== undefined) {
         query = query.eq('is_archived', filters.archived);
       }
-      if (filters?.tags && filters.tags.length > 0) {
-        query = query.in('note_tags.tag_id', filters.tags);
-      }
 
       const { data, error } = await query.order('updated_at', { ascending: false });
       
       if (error) throw error;
-      return data as unknown as Note[];
-    }
-  });
 
-  // Create note mutation
-  const { mutate: createNote, isPending: isCreating } = useMutation({
-    mutationFn: async (noteData: Partial<Note>) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
+      // If filtering by tag, we need to filter on the client side since
+      // Supabase .in() on a joined table doesn't filter the parent rows
+      let notes = (data || []).map(toFrontendNote);
 
-      const { data, error } = await supabase
-        .from('notes')
-        .insert([{
-          ...noteData,
-          user_id: user.id
-        }])
-        .select()
-        .single();
+      if (filters?.tags && filters.tags.length > 0) {
+        notes = notes.filter((n) => 
+          n.note_tags?.some((nt) => filters.tags!.includes(nt.tag_id))
+        );
+      }
 
-      if (error) throw error;
-      return data;
-    },
-    onMutate: async (newNote) => {
-      // Optimistic update in Zustand
-      useNotesStore.getState().addNote(newNote as Note);
-
-      // Queue for offline sync
-      useNotesStore.getState().addToSyncQueue({
-        action: 'create',
-        resourceType: 'note',
-        payload: newNote as Record<string, unknown>
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes'] });
+      return notes;
     }
   });
 
   // Update note mutation
   const { mutate: updateNote, isPending: isUpdating } = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Note> }) => {
+      const snakeUpdates = toSnakeCaseUpdates(updates);
+
       const { data, error } = await supabase
         .from('notes')
-        .update(updates)
+        .update(snakeUpdates)
         .eq('id', id)
-        .select()
+        .select('*, note_tags(tag_id)')
         .single();
 
       if (error) throw error;
-      return data;
+      return toFrontendNote(data);
     },
     onMutate: ({ id, updates }) => {
+      // Optimistic update in Zustand local store
       useNotesStore.getState().updateNote(id, updates);
-      useNotesStore.getState().addToSyncQueue({
-        action: 'update',
-        resourceType: 'note',
-        resourceId: id,
-        payload: updates as Record<string, unknown>
-      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes'] });
@@ -118,32 +131,24 @@ export function useNotes(filters?: {
     },
     onMutate: ({ id }) => {
       useNotesStore.getState().removeNote(id);
-      useNotesStore.getState().addToSyncQueue({
-        action: 'delete',
-        resourceType: 'note',
-        resourceId: id,
-        payload: { is_soft_deleted: true, deleted_at: new Date().toISOString() }
-      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes'] });
     }
   });
 
-  // When offline or waiting for sync, localNotes in Zustand is the source of truth for optimistic updates.
-  // In a full implementation we would merge `serverNotes` and `localNotes` based on `updatedAt`.
-  // For the MVP, we can rely on Zustand as the source of truth if `serverNotes` is empty, or merge them.
-  const displayNotes = localNotes.length > 0 ? localNotes : serverNotes;
+  // Use server notes as primary source of truth. Fall back to local store only
+  // when server data hasn't loaded yet (e.g. offline / first render).
+  const notes = serverNotes.length > 0 || !isLoading ? serverNotes : useNotesStore.getState().notes;
 
   return {
-    notes: displayNotes,
+    notes,
     serverNotes,
     isLoading,
     error,
-    createNote,
-    isCreating,
     updateNote,
     isUpdating,
     deleteNote
   };
 }
+

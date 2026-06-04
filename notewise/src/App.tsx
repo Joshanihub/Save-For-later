@@ -15,6 +15,8 @@ import { initReminderWorker } from './workers/reminderWorker';
 import { Dashboard } from './components/layout/Dashboard';
 import { SettingsModal } from './components/shared/SettingsModal';
 
+import { ReadingListView } from './components/layout/ReadingListView';
+
 export default function App() {
   // Initialize theme
   useTheme();
@@ -146,6 +148,8 @@ export default function App() {
             noteId={selectedNoteId}
             onBack={() => setSelectedNoteId(null)}
           />
+        ) : activeView === 'reading-list' && !searchQuery ? (
+          <ReadingListView />
         ) : activeView === 'dashboard' && !searchQuery ? (
           <Dashboard 
             onNewNote={handleNewNote} 
