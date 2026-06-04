@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabaseClient';
+import useToastStore from '../store/toastStore';
 import type { Task } from '../types';
 
 export function useTasks(noteId?: string) {
@@ -66,6 +67,9 @@ export function useTasks(noteId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+    onError: (error) => {
+      useToastStore.getState().showToast(error.message, 'error');
     }
   });
 
@@ -97,6 +101,9 @@ export function useTasks(noteId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+    onError: (error) => {
+      useToastStore.getState().showToast(error.message, 'error');
     }
   });
 
@@ -111,6 +118,9 @@ export function useTasks(noteId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+    onError: (error) => {
+      useToastStore.getState().showToast(error.message, 'error');
     }
   });
 

@@ -92,7 +92,7 @@ const useNotesStore = create<NotesState>()(
                   ...item,
                   status,
                   lastError: error,
-                  retryCount: status === 'failed' ? item.retryCount + 1 : item.retryCount,
+                  retryCount: status === 'failed' ? (item.retryCount || 0) + 1 : (item.retryCount || 0),
                 }
               : item,
           ),

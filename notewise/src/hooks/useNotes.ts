@@ -1,3 +1,4 @@
+import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabaseClient';
 import useNotesStore from '../store/notesStore';
@@ -137,9 +138,40 @@ export function useNotes(filters?: {
     }
   });
 
-  // Use server notes as primary source of truth. Fall back to local store only
-  // when server data hasn't loaded yet (e.g. offline / first render).
-  const notes = serverNotes.length > 0 || !isLoading ? serverNotes : useNotesStore.getState().notes;
+  // We need to merge serverNotes with localNotes to show newly created/optimistic notes
+  const localNotes = useNotesStore((state) => state.notes);
+
+  const notes = React.useMemo(() => {
+    if (isLoading && serverNotes.length === 0) {
+      return localNotes;
+    }
+    
+    // Server notes are the source of truth, but we need to append any local notes
+    // that haven't been synced to the server yet (e.g. newly created notes).
+    // We match by ID.
+    const serverNoteIds = new Set(serverNotes.map(n => n.id));
+    let unsyncedLocalNotes = localNotes.filter(n => !serverNoteIds.has(n.id));
+    
+    // Apply active filters to unsynced local notes so they don't pollute other views
+    if (filters?.collectionId) {
+      unsyncedLocalNotes = unsyncedLocalNotes.filter(n => n.collectionId === filters.collectionId);
+    }
+    if (filters?.archived !== undefined) {
+      unsyncedLocalNotes = unsyncedLocalNotes.filter(n => n.isArchived === filters.archived);
+    }
+    if (filters?.tags && filters.tags.length > 0) {
+      unsyncedLocalNotes = unsyncedLocalNotes.filter(n => 
+        n.note_tags?.some(nt => filters.tags!.includes(nt.tag_id))
+      );
+    }
+    
+    // For updates, we could try to merge, but we rely on React Query optimistic updates 
+    // resolving and refetching. 
+    
+    return [...unsyncedLocalNotes, ...serverNotes].sort(
+      (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    );
+  }, [serverNotes, localNotes, isLoading]);
 
   return {
     notes,

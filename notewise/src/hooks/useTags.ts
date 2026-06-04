@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabaseClient';
 import type { Tag } from '../types';
+import useToastStore from '../store/toastStore';
 
 export function useTags() {
   const queryClient = useQueryClient();
@@ -47,6 +48,9 @@ export function useTags() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
+    },
+    onError: (error) => {
+      useToastStore.getState().showToast(error.message, 'error');
     }
   });
 
@@ -67,6 +71,9 @@ export function useTags() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
+    },
+    onError: (error) => {
+      useToastStore.getState().showToast(error.message, 'error');
     }
   });
 
@@ -81,6 +88,9 @@ export function useTags() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
+    },
+    onError: (error) => {
+      useToastStore.getState().showToast(error.message, 'error');
     }
   });
 
@@ -93,6 +103,9 @@ export function useTags() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes'] });
+    },
+    onError: (error) => {
+      useToastStore.getState().showToast(error.message, 'error');
     }
   });
 
@@ -107,6 +120,9 @@ export function useTags() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes'] });
+    },
+    onError: (error) => {
+      useToastStore.getState().showToast(error.message, 'error');
     }
   });
 

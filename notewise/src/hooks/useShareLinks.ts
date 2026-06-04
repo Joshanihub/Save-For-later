@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabaseClient';
 import type { ShareLink } from '../types';
+import useToastStore from '../store/toastStore';
 
 export function useShareLinks(noteId?: string) {
   const queryClient = useQueryClient();
@@ -58,6 +59,9 @@ export function useShareLinks(noteId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
+    },
+    onError: (error) => {
+      useToastStore.getState().showToast(error.message, 'error');
     }
   });
 
@@ -72,6 +76,9 @@ export function useShareLinks(noteId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
+    },
+    onError: (error) => {
+      useToastStore.getState().showToast(error.message, 'error');
     }
   });
 

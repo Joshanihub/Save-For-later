@@ -19,6 +19,7 @@ import { useTags } from '../../hooks/useTags';
 
 import { useStreaks } from '../../hooks/useStreaks';
 import { PomodoroTimer } from './PomodoroTimer';
+import { NotificationPrompt } from './NotificationPrompt';
 
 interface SidebarProps {
   onNewNote: () => void;
@@ -237,6 +238,9 @@ export function Sidebar({ onNewNote, activeView, onViewChange }: SidebarProps) {
           )}
         </div>
       </nav>
+
+      {/* Notification Prompt (shows once if needed) */}
+      <NotificationPrompt />
 
       {/* Pomodoro Timer */}
       <PomodoroTimer />

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabaseClient';
 import type { Reminder } from '../types';
+import useToastStore from '../store/toastStore';
 
 export function useReminders(noteId?: string) {
   const queryClient = useQueryClient();
@@ -57,6 +58,9 @@ export function useReminders(noteId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reminders'] });
+    },
+    onError: (error) => {
+      useToastStore.getState().showToast(error.message, 'error');
     }
   });
 
@@ -82,6 +86,9 @@ export function useReminders(noteId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reminders'] });
+    },
+    onError: (error) => {
+      useToastStore.getState().showToast(error.message, 'error');
     }
   });
 
@@ -96,6 +103,9 @@ export function useReminders(noteId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reminders'] });
+    },
+    onError: (error) => {
+      useToastStore.getState().showToast(error.message, 'error');
     }
   });
 
