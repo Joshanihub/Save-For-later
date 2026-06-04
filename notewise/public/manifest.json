@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Notewise",
+  "version": "0.1.0",
+  "description": "Apple-inspired minimalist note-taking in your browser",
+  "permissions": [
+    "storage",
+    "alarms",
+    "notifications",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://*.supabase.co/*"
+  ],
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "Open Notewise"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; frame-src 'self' https://*;"
+  }
+}

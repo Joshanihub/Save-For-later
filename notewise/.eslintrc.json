@@ -1,0 +1,77 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "prettier"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaFeatures": { "jsx": true },
+    "ecmaVersion": "latest",
+    "sourceType": "module",
+    "project": "./tsconfig.json"
+  },
+  "plugins": ["react", "react-hooks", "@typescript-eslint", "import"],
+  "rules": {
+    "no-eval": "error",
+    "no-implied-eval": "error",
+    "@typescript-eslint/no-eval": "error",
+    "@typescript-eslint/no-any": "error",
+    "@typescript-eslint/no-implicit-any": "error",
+    "@typescript-eslint/explicit-function-return-types": [
+      "error",
+      { "allowExpressions": false, "allowTypedFunctionExpressions": true }
+    ],
+    "@typescript-eslint/explicit-module-boundary-types": "error",
+    "@typescript-eslint/no-non-null-assertion": "warn",
+    "react/react-in-jsx-scope": "off",
+    "react/prop-types": "off",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "error",
+    "react/display-name": "warn",
+    "import/order": [
+      "error",
+      {
+        "groups": [
+          "builtin",
+          "external",
+          "internal",
+          "parent",
+          "sibling",
+          "index"
+        ],
+        "pathGroups": [
+          { "pattern": "react", "group": "builtin", "rank": 0 },
+          { "pattern": "@/**", "group": "internal", "rank": 1 }
+        ],
+        "pathGroupsExcludedImportTypes": ["react"],
+        "alphabetize": { "order": "asc", "caseInsensitive": true }
+      }
+    ],
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
+    ],
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "no-debugger": "error",
+    "prefer-const": "error",
+    "no-var": "error",
+    "eqeqeq": ["error", "always"],
+    "no-implicit-coercion": "error",
+    "no-shadow": "off",
+    "@typescript-eslint/no-shadow": "error"
+  },
+  "settings": {
+    "react": { "version": "detect" }
+  },
+  "ignorePatterns": ["dist", "build", "node_modules", "coverage", "eslint.config.js"]
+}

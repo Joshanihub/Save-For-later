@@ -1,0 +1,204 @@
+/* ─── Google Fonts ─────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── CSS Variables — Light Theme ──────────────────────────────── */
+:root {
+  --surface-0: #FFFFFF;
+  --surface-1: #F9FAFB;
+  --surface-2: #F3F4F6;
+  --surface-3: #E5E7EB;
+
+  --text-primary:   #111827;
+  --text-secondary: #4B5563;
+  --text-tertiary:  #9CA3AF;
+  --text-inverse:   #FFFFFF;
+
+  --border-default: #E5E7EB;
+  --border-subtle:  #F3F4F6;
+  --border-strong:  #D1D5DB;
+
+  --sidebar-bg: #FAFBFC;
+  --editor-bg:  #FFFFFF;
+
+  color-scheme: light;
+}
+
+/* ─── CSS Variables — Dark Theme ───────────────────────────────── */
+.dark {
+  --surface-0: #0F1117;
+  --surface-1: #161822;
+  --surface-2: #1E2030;
+  --surface-3: #282A3A;
+
+  --text-primary:   #F1F3F9;
+  --text-secondary: #A0A6BE;
+  --text-tertiary:  #636883;
+  --text-inverse:   #0F1117;
+
+  --border-default: #282A3A;
+  --border-subtle:  #1E2030;
+  --border-strong:  #363850;
+
+  --sidebar-bg: #12141E;
+  --editor-bg:  #0F1117;
+
+  color-scheme: dark;
+}
+
+/* ─── Base Reset & Typography ──────────────────────────────────── */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    @apply border-edge;
+  }
+
+  html {
+    @apply antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  body {
+    @apply bg-surface-0 text-txt-primary font-sans;
+    @apply transition-colors duration-200;
+  }
+
+  /* Smooth scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full;
+    background-color: var(--text-tertiary);
+    opacity: 0.3;
+    transition: background 0.2s;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    opacity: 0.5;
+  }
+
+  /* Focus ring */
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-500/40 ring-offset-2 ring-offset-surface-0;
+  }
+}
+
+/* ─── Component Utilities ──────────────────────────────────────── */
+@layer components {
+  /* Glassmorphism panels */
+  .glass {
+    @apply bg-surface-0 backdrop-blur-md border border-edge-subtle;
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+  .dark .glass {
+    background-color: rgba(15, 17, 23, 0.8);
+  }
+  .glass-dark {
+    @apply bg-surface-1 backdrop-blur-lg border border-edge-subtle;
+    background-color: rgba(22, 24, 34, 0.6);
+  }
+
+  /* Floating card style */
+  .card {
+    @apply bg-surface-0 rounded-2xl border border-edge shadow-card;
+    @apply transition-all duration-200 ease-out;
+  }
+  .card:hover {
+    @apply shadow-card-hover border-edge-strong;
+  }
+
+  /* Note card in grid */
+  .note-card {
+    @apply card p-4 cursor-pointer;
+    @apply hover:translate-y-[-2px];
+  }
+  .note-card.selected {
+    @apply ring-2 ring-brand-500/40 border-brand-400;
+  }
+
+  /* Sidebar item */
+  .sidebar-item {
+    @apply flex items-center gap-3 px-3 py-2 rounded-xl;
+    @apply text-txt-secondary text-sm font-medium;
+    @apply transition-all duration-150 ease-out;
+    @apply hover:bg-surface-2 hover:text-txt-primary;
+  }
+  .sidebar-item.active {
+    @apply bg-brand-500/10 text-brand-600;
+  }
+  .dark .sidebar-item.active {
+    @apply bg-brand-500/15 text-brand-400;
+  }
+
+  /* Action button */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2;
+    @apply px-4 py-2 rounded-xl text-sm font-semibold;
+    @apply bg-brand-500 text-white;
+    @apply shadow-glow-sm hover:shadow-glow hover:bg-brand-600;
+    @apply active:scale-[0.98];
+    @apply transition-all duration-150 ease-out;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2;
+    @apply px-3 py-2 rounded-xl text-sm font-medium;
+    @apply text-txt-secondary hover:text-txt-primary;
+    @apply hover:bg-surface-2;
+    @apply active:scale-[0.98];
+    @apply transition-all duration-150 ease-out;
+  }
+
+  .btn-icon {
+    @apply inline-flex items-center justify-center;
+    @apply w-9 h-9 rounded-xl;
+    @apply text-txt-secondary hover:text-txt-primary;
+    @apply hover:bg-surface-2;
+    @apply active:scale-[0.95];
+    @apply transition-all duration-150 ease-out;
+  }
+
+  /* Input */
+  .input {
+    @apply w-full px-3.5 py-2.5 rounded-xl;
+    @apply bg-surface-1 border border-edge text-txt-primary;
+    @apply placeholder:text-txt-tertiary text-sm;
+    @apply focus:border-brand-400 focus:ring-2 focus:ring-brand-500/20;
+    @apply transition-all duration-150;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-lg;
+    @apply text-2xs font-semibold;
+    @apply bg-surface-2 text-txt-secondary;
+  }
+
+  /* Skeleton loading */
+  .skeleton {
+    @apply bg-surface-2 rounded-lg animate-pulse;
+  }
+}
+
+/* ─── Utility Overrides ────────────────────────────────────────── */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .gradient-brand {
+    @apply bg-gradient-to-r from-brand-500 to-brand-400;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-brand-500 to-brand-300 bg-clip-text text-transparent;
+  }
+}
